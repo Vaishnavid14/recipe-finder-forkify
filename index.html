@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .controls select, .controls input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #0056b3;
+    }
+    .recipe-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .recipe {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+    .recipe img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .recipe h3 {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Recipe Finder</h1>
+    <div class="controls">
+      <input type="text" id="ingredient-input" placeholder="Enter a recipe keyword...">
+      <button id="search-button">Search</button>
+    </div>
+    <div class="recipe-list" id="recipe-list"></div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'https://forkify-api.herokuapp.com/api/v2/recipes';
+    const ingredientInput = document.getElementById('ingredient-input');
+    const searchButton = document.getElementById('search-button');
+    const recipeList = document.getElementById('recipe-list');
+
+    // Fetch recipes based on keyword
+    async function fetchRecipes(keyword) {
+      try {
+        const response = await fetch(`${API_BASE_URL}?search=${keyword}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch recipes');
+        }
+        const data = await response.json();
+        displayRecipes(data.data.recipes);
+      } catch (error) {
+        recipeList.innerHTML = '<p>No recipes found. Please try again.</p>';
+      }
+    }
+
+    // Display recipes in the recipe list
+    function displayRecipes(recipes) {
+      if (!recipes || recipes.length === 0) {
+        recipeList.innerHTML = '<p>No recipes found. Please try a different keyword.</p>';
+        return;
+      }
+
+      recipeList.innerHTML = recipes.map(recipe => `
+        <div class="recipe">
+          <img src="${recipe.image_url}" alt="${recipe.title}">
+          <h3>${recipe.title}</h3>
+          <a href="${recipe.source_url}" target="_blank">View Recipe</a>
+        </div>
+      `).join('');
+    }
+
+    // Fetch recipes when the search button is clicked
+    searchButton.addEventListener('click', () => {
+      const keyword = ingredientInput.value.trim();
+      if (keyword === '') {
+        alert('Please enter a recipe keyword.');
+        return;
+      }
+      fetchRecipes(keyword);
+    });
+  </script>
+</body>
+</html>
